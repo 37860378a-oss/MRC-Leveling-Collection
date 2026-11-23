@@ -3,8 +3,8 @@
  <Rotation>
   <RotationName>MRC_Holy_SmartHeal_1-80_ES</RotationName>
   <RotationDefault>true</RotationDefault>
-  <RotationList>-- MRC Heal Engine --|-- MRC Smart Heal --|-- MRC Control --</RotationList>
+  <RotationList>-- MRC Heal Engine --|-- MRC Judgement of Light --|-- MRC Smart Heal --|-- MRC Control --</RotationList>
   <RequireCombat>false</RequireCombat>
-  <RotationNotes>Sanacion automatica para grupo y banda. El motor actualiza PQR_CustomTarget con el aliado vivo de menor porcentaje de vida dentro de rango. No requiere seleccionar manualmente al aliado. Configurar el tanque como focus para mantener Senal de la Luz y Escudo Sagrado cuando esten aprendidos. Pendiente de prueba en cliente 3.3.5a.</RotationNotes>
+  <RotationNotes>Sanacion automatica para grupo y banda. Mantener un enemigo en target para aplicar y renovar Sentencia de Luz. El motor actualiza PQR_CustomTarget con el aliado vivo de menor porcentaje de vida dentro de rango. No requiere seleccionar manualmente al aliado. Configurar el tanque como focus para mantener Senal de la Luz y Escudo Sagrado cuando esten aprendidos. Pendiente de prueba en cliente 3.3.5a.</RotationNotes>
  </Rotation>
 </PALADIN>
