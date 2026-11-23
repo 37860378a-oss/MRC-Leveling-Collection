@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<DEATHKNIGHT>
+ <Rotation>
+  <RotationName>MRC_Unholy_Leveo_1-80_ES</RotationName>
+  <RotationDefault>true</RotationDefault>
+  <RotationList>-- Motor MRC --|-- Control MRC --|-- Golpe de la Plaga --|-- Espiral de la muerte --|-- Golpe sangriento --|-- Toque helado --|-- Hervor de sangre --</RotationList>
+  <RequireCombat>false</RequireCombat>
+  <RotationNotes>Base inicial de leveo 1-80. Busca habilidades aprendidas por nombre esES. CTRL izquierdo pausa/reanuda. SHIFT habilita las habilidades AoE. Pendiente de auditoría y pruebas en WoW 3.3.5a.</RotationNotes>
+ </Rotation>
+</DEATHKNIGHT>

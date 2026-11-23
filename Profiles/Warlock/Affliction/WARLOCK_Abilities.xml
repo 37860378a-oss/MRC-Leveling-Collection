@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='utf-8'?>
+<WARLOCK>
+  <Ability>
+    <Name>-- Motor MRC --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>if not MRC then
+ MRC={}
+ MRC.Book={}
+ function MRC.Refresh()
+  MRC.Book={}
+  if not GetSpellName then return end
+  for i=1,300 do local n=GetSpellName(i,BOOKTYPE_SPELL); if not n then break end; MRC.Book[n]=true end
+ end
+ function MRC.Known(n) if not MRC.Book or not next(MRC.Book) then MRC.Refresh() end; return MRC.Book[n]==true end
+ function MRC.Cast(n,aoe)
+  if StopRota or not MRC.Known(n) then return false end
+  if aoe and not IsShiftKeyDown() then return false end
+  if not aoe and IsShiftKeyDown() then return false end
+  if UnitCastingInfo("player") or UnitChannelInfo("player") then return false end
+  if not UnitExists("target") or UnitIsDeadOrGhost("target") or not IsUsableSpell(n) then return false end
+  if not UnitCanAttack('player','target') then return false end
+  local s,d=GetSpellCooldown(n)
+  if s and d and d&gt;1.6 and s+d&gt;GetTime() then return false end
+  local range=IsSpellInRange(n,"target"); if range==0 then return false end
+  CastSpellByName(n); return true
+ end
+end
+return false</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Control MRC --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>if IsLeftControlKeyDown() and not MRC.ctrl then MRC.ctrl=true; StopRota=not StopRota; PQR_WriteToChat(StopRota and "MRC pausado" or "MRC activo") elseif not IsLeftControlKeyDown() then MRC.ctrl=false end; return false</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Corrupción --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Corrupción", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Aflicción inestable --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Aflicción inestable", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Embrujar --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Embrujar", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Inmolar --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Inmolar", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Drenar alma --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Drenar alma", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Semilla de corrupción --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Semilla de corrupción", true)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+</WARLOCK>

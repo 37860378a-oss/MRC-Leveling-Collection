@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='utf-8'?>
+<SHAMAN>
+  <Ability>
+    <Name>-- Motor MRC --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>if not MRC then
+ MRC={}
+ MRC.Book={}
+ function MRC.Refresh()
+  MRC.Book={}
+  if not GetSpellName then return end
+  for i=1,300 do local n=GetSpellName(i,BOOKTYPE_SPELL); if not n then break end; MRC.Book[n]=true end
+ end
+ function MRC.Known(n) if not MRC.Book or not next(MRC.Book) then MRC.Refresh() end; return MRC.Book[n]==true end
+ function MRC.Cast(n,aoe)
+  if StopRota or not MRC.Known(n) then return false end
+  if aoe and not IsShiftKeyDown() then return false end
+  if not aoe and IsShiftKeyDown() then return false end
+  if UnitCastingInfo("player") or UnitChannelInfo("player") then return false end
+  if not UnitExists("target") or UnitIsDeadOrGhost("target") or not IsUsableSpell(n) then return false end
+  if not UnitCanAttack('player','target') then return false end
+  local s,d=GetSpellCooldown(n)
+  if s and d and d&gt;1.6 and s+d&gt;GetTime() then return false end
+  local range=IsSpellInRange(n,"target"); if range==0 then return false end
+  CastSpellByName(n); return true
+ end
+end
+return false</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Control MRC --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>if IsLeftControlKeyDown() and not MRC.ctrl then MRC.ctrl=true; StopRota=not StopRota; PQR_WriteToChat(StopRota and "MRC pausado" or "MRC activo") elseif not IsLeftControlKeyDown() then MRC.ctrl=false end; return false</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Golpe de tormenta --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Golpe de tormenta", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Latigazo de lava --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Latigazo de lava", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Choque de tierra --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Choque de tierra", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Choque de llamas --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Choque de llamas", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Cadena de relámpagos --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Cadena de relámpagos", true)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+</SHAMAN>

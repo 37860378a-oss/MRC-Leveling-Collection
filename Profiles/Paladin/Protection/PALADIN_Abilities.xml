@@ -11,32 +11,28 @@
   for i=1,300 do local n=GetSpellName(i,BOOKTYPE_SPELL); if not n then break end; MRC.Book[n]=true end
  end
  function MRC.Known(n) if not MRC.Book or not next(MRC.Book) then MRC.Refresh() end; return MRC.Book[n]==true end
- function MRC.ValidTarget()
-  return UnitExists("target") and UnitCanAttack("player","target") and not UnitIsDeadOrGhost("target")
- end
  function MRC.Cast(n,aoe)
   if StopRota or not MRC.Known(n) then return false end
   if aoe and not IsShiftKeyDown() then return false end
   if not aoe and IsShiftKeyDown() then return false end
   if UnitCastingInfo("player") or UnitChannelInfo("player") then return false end
-  if not MRC.ValidTarget() or not IsUsableSpell(n) then return false end
+  if not UnitExists("target") or UnitIsDeadOrGhost("target") or not IsUsableSpell(n) then return false end
+  if not UnitCanAttack('player','target') then return false end
   local s,d=GetSpellCooldown(n)
   if s and d and d&gt;1.6 and s+d&gt;GetTime() then return false end
-  if IsSpellInRange(n,"target")==0 then return false end
-  CastSpellByName(n)
-  return true
+  local range=IsSpellInRange(n,"target"); if range==0 then return false end
+  CastSpellByName(n); return true
  end
 end
-return false</Lua><RecastDelay>0</RecastDelay><Target>Custom</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+return false</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
   </Ability>
   <Ability>
-    <Name>-- Pausar rotacion --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
-    <Lua>if IsLeftControlKeyDown() and not MRC.ctrl then MRC.ctrl=true; StopRota=not StopRota; PQR_WriteToChat(StopRota and "MRC pausado" or "MRC activo") elseif not IsLeftControlKeyDown() then MRC.ctrl=false end
-return false</Lua><RecastDelay>0</RecastDelay><Target>Custom</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+    <Name>-- Control MRC --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>if IsLeftControlKeyDown() and not MRC.ctrl then MRC.ctrl=true; StopRota=not StopRota; PQR_WriteToChat(StopRota and "MRC pausado" or "MRC activo") elseif not IsLeftControlKeyDown() then MRC.ctrl=false end; return false</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
   </Ability>
   <Ability>
     <Name>-- Escudo de rectitud --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
-    <Lua>return MRC.Cast("Escudo de rectitud", true)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+    <Lua>return MRC.Cast("Escudo de rectitud", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
   </Ability>
   <Ability>
     <Name>-- Martillo del honrado --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
@@ -44,26 +40,14 @@ return false</Lua><RecastDelay>0</RecastDelay><Target>Custom</Target><CancelChan
   </Ability>
   <Ability>
     <Name>-- Sentencia de sabiduría --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
-    <Lua>return MRC.Cast("Sentencia de sabiduría", true)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+    <Lua>return MRC.Cast("Sentencia de sabiduría", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
   </Ability>
   <Ability>
     <Name>-- Consagración --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
     <Lua>return MRC.Cast("Consagración", true)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
   </Ability>
   <Ability>
-    <Name>-- Escudo sacro --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
-    <Lua>return MRC.Cast("Escudo sacro", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
-  </Ability>
-  <Ability>
     <Name>-- Cólera sagrada --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
     <Lua>return MRC.Cast("Cólera sagrada", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
-  </Ability>
-  <Ability>
-    <Name>-- Defensa recta --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
-    <Lua>return MRC.Cast("Defensa recta", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
-  </Ability>
-  <Ability>
-    <Name>-- Escudo divino --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
-    <Lua>return MRC.Cast("Escudo divino", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
   </Ability>
 </PALADIN>

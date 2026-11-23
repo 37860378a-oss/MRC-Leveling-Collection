@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<DRUID>
+ <Rotation>
+  <RotationName>MRC_Restoration_Leveo_1-80_ES</RotationName>
+  <RotationDefault>true</RotationDefault>
+  <RotationList>-- Motor MRC --|-- Control MRC --|-- Recrecimiento --|-- Rejuvenecimiento --|-- Flor de vida --|-- Nutrir --|-- Alivio presto --</RotationList>
+  <RequireCombat>false</RequireCombat>
+  <RotationNotes>Base inicial de leveo 1-80. Busca habilidades aprendidas por nombre esES. CTRL izquierdo pausa/reanuda. SHIFT habilita las habilidades AoE. Selecciona manualmente un aliado como objetivo para las curas. Pendiente de auditoría y pruebas en WoW 3.3.5a.</RotationNotes>
+ </Rotation>
+</DRUID>

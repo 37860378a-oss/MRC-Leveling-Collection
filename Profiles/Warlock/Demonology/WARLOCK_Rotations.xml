@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<WARLOCK>
+ <Rotation>
+  <RotationName>MRC_Demonology_Leveo_1-80_ES</RotationName>
+  <RotationDefault>true</RotationDefault>
+  <RotationList>-- Motor MRC --|-- Control MRC --|-- Corrupción --|-- Inmolar --|-- Descarga de las Sombras --|-- Incinerar --|-- Fuego de alma --|-- Semilla de corrupción --</RotationList>
+  <RequireCombat>false</RequireCombat>
+  <RotationNotes>Base inicial de leveo 1-80. Busca habilidades aprendidas por nombre esES. CTRL izquierdo pausa/reanuda. SHIFT habilita las habilidades AoE. Pendiente de auditoría y pruebas en WoW 3.3.5a.</RotationNotes>
+ </Rotation>
+</WARLOCK>

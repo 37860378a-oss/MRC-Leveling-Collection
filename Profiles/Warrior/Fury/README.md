@@ -1,32 +1,22 @@
 # Guerrero – Furia (leveo 1–80)
 
-**Estado:** base inicial generada automáticamente; pendiente de auditoría y pruebas en WoW 3.3.5a.
+**Estado:** base inicial generada; pendiente de auditoría y pruebas en WoW 3.3.5a.
 
-## Archivos
-- `GUERRERO_Abilities.xml`
-- `GUERRERO_Rotations.xml`
+Archivos: `WARRIOR_Abilities.xml` y `WARRIOR_Rotations.xml`.
 
-## Funcionamiento previsto
 - PQR con estructura DarhangeR.
-- Busca hechizos por nombre en el libro de hechizos esES y omite los no aprendidos.
-- Unitarget como modo normal; mantener SHIFT permite habilidades de área.
-- CTRL izquierdo pausa/reanuda el perfil.
+- Omite hechizos no aprendidos según el libro esES.
+- CTRL izquierdo: pausa/reanuda.
+- SHIFT: habilita las habilidades AoE listadas.
+
 
 ## Prioridad inicial
 1. Sed de sangre
 2. Torbellino
 3. Golpe mortal
-4. Embate
-5. Ejecutar
-6. Golpe heroico
-7. Rajar
+4. Ejecutar
 
-## Habilidades AoE (SHIFT)
-- Sed de sangre
-- Torbellino
-- Golpe mortal
-- Ejecutar
-- Golpe heroico
+## AoE (SHIFT)
+- Rajar
 
-## Advertencias
-Esta base no es una rotación validada ni sustituye decisiones de combate. Los nombres localizados pueden variar según cliente/servidor; algunas habilidades dependen de talentos, nivel, arma, forma, recursos o condiciones específicas. Revisar y probar cada habilidad antes de usarla en juego. No se declara funcional hasta completar pruebas en cliente 3.3.5a.
+**Advertencia:** las prioridades son un punto de partida, no una rotación optimizada. Revisar traducciones, requisitos de talentos, recursos, armas, formas, rango y APIs del ejecutor. No usar como validado hasta probarlo en cliente 3.3.5a.
