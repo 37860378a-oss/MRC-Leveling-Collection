@@ -38,3 +38,8 @@ Estado inicial: **pendiente de desarrollo y pruebas**.
 ## Variantes de Feral
 
 El perfil Feral podrá documentar dos estilos configurables: DPS y tanque. Son variantes del mismo árbol en WotLK, no árboles separados.
+
+
+## Estado de implementación
+
+Se creó una base inicial para las 30 especializaciones en `Profiles/`. Cada carpeta incluye los XML de habilidades y rotación y un README. **Estado global: pendiente de auditoría y pruebas en WoW 3.3.5a.** La creación de archivos no implica que las rotaciones estén optimizadas ni verificadas en el cliente. Hunter Bestias es una base heredada recuperada; el resto son bases iniciales generadas para revisión.
