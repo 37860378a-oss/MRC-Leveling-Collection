@@ -1,56 +1,39 @@
 <?xml version='1.0' encoding='utf-8'?>
 <PRIEST>
-  <Ability>
-    <Name>-- Motor MRC --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
-    <Lua>if not MRC then
- MRC={}
- MRC.Book={}
- function MRC.Refresh()
-  MRC.Book={}
-  if not GetSpellName then return end
-  for i=1,300 do local n=GetSpellName(i,BOOKTYPE_SPELL); if not n then break end; MRC.Book[n]=true end
+ <Ability>
+  <Name>-- MRC Smart Raid Heal --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+  <Lua>if not MRC then MRC={} end
+ local units={}
+ if GetNumRaidMembers and GetNumRaidMembers()&gt;0 then
+  for i=1,GetNumRaidMembers() do units[#units+1]="raid"..i end
+ elseif GetNumPartyMembers and GetNumPartyMembers()&gt;0 then
+  units[#units+1]="player"
+  for i=1,GetNumPartyMembers() do units[#units+1]="party"..i end
+ else units[1]="player" end
+ return units
+ local best,bestHP=nil,101
+ for _,u in ipairs(units) do
+  if UnitExists(u) and not UnitIsDeadOrGhost(u) and UnitCanAssist("player",u) and UnitIsConnected(u) then
+   local hp=100*UnitHealth(u)/math.max(1,UnitHealthMax(u))
+   local inRange=UnitInRange(u)
+   if hp&lt;bestHP and (inRange==nil or inRange==1) then best,bestHP=u,hp end
+  end
  end
- MRC.Refresh()
- MRC.EventFrame=CreateFrame("Frame")
- MRC.EventFrame:RegisterEvent("SPELLS_CHANGED")
- MRC.EventFrame:SetScript("OnEvent",function() MRC.Refresh() end)
- function MRC.Known(n) return MRC.Book and MRC.Book[n]==true end
- function MRC.Cast(n,aoe)
-  if StopRota or not MRC.Known(n) then return false end
-  if aoe and not IsShiftKeyDown() then return false end
-  if UnitCastingInfo("player") or UnitChannelInfo("player") then return false end
-  if not UnitExists("target") or UnitIsDeadOrGhost("target") or not IsUsableSpell(n) then return false end
-  if UnitCanAttack('player','target') then return false end
-  local s,d=GetSpellCooldown(n)
-  if s and d and d&gt;1.6 and s+d&gt;GetTime() then return false end
-  local range=IsSpellInRange(n,"target"); if range==0 then return false end
-  CastSpellByName(n); return true
+ if not best then return false end
+ local spells={{name="Penitencia",hp=65},{name="Sanación relámpago",hp=60},{name="Sanación superior",hp=82}}
+ for _,sp in ipairs(spells) do
+  if bestHP&lt;sp.hp and IsUsableSpell(sp.name) then
+   local start,duration=GetSpellCooldown(sp.name)
+   if not start or not duration or duration&lt;=1.6 or start+duration&lt;=GetTime() then
+    CastSpellByName(sp.name,best)
+    return true
+   end
+  end
  end
-end
-return false</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
-  </Ability>
-  <Ability>
-    <Name>-- Control MRC --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
-    <Lua>if IsLeftControlKeyDown() and not MRC.ctrl then MRC.ctrl=true; StopRota=not StopRota; PQR_WriteToChat(StopRota and "MRC pausado" or "MRC activo") elseif not IsLeftControlKeyDown() then MRC.ctrl=false end; return false</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
-  </Ability>
-  <Ability>
-    <Name>-- Penitencia --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
-    <Lua>return MRC.Cast("Penitencia", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
-  </Ability>
-  <Ability>
-    <Name>-- Palabra de poder: escudo --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
-    <Lua>return MRC.Cast("Palabra de poder: escudo", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
-  </Ability>
-  <Ability>
-    <Name>-- Rezo de alivio --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
-    <Lua>return MRC.Cast("Rezo de alivio", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
-  </Ability>
-  <Ability>
-    <Name>-- Sanación relámpago --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
-    <Lua>return MRC.Cast("Sanación relámpago", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
-  </Ability>
-  <Ability>
-    <Name>-- Sanación superior --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
-    <Lua>return MRC.Cast("Sanación superior", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
-  </Ability>
+ return false</Lua><RecastDelay>0</RecastDelay><Target>Custom</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+ </Ability>
+ <Ability>
+  <Name>-- MRC Control --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+  <Lua>if IsLeftControlKeyDown() and not MRC.ctrl then MRC.ctrl=true; StopRota=not StopRota; PQR_WriteToChat(StopRota and "MRC pausado" or "MRC activo") elseif not IsLeftControlKeyDown() then MRC.ctrl=false end; return false</Lua><RecastDelay>0</RecastDelay><Target>Custom</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+ </Ability>
 </PRIEST>
