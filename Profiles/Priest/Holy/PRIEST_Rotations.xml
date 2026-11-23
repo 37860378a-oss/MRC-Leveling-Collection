@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
 <PRIEST>
  <Rotation>
-  <RotationName>MRC_Holy_Leveo_1-80_ES</RotationName>
+  <RotationName>MRC_Holy_SmartHeal_1-80_ES</RotationName>
   <RotationDefault>true</RotationDefault>
-  <RotationList>-- Motor MRC --|-- Control MRC --|-- Círculo de sanación --|-- Rezo de sanación --|-- Sanación relámpago --|-- Sanación superior --|-- Renovar --</RotationList>
+  <RotationList>-- MRC Smart Raid Heal --|-- MRC Control --</RotationList>
   <RequireCombat>false</RequireCombat>
-  <RotationNotes>Base inicial de leveo 1-80. Busca habilidades aprendidas por nombre esES. CTRL izquierdo pausa/reanuda. SHIFT habilita las habilidades AoE. Selecciona manualmente un aliado como objetivo para las curas. Pendiente de auditoría y pruebas en WoW 3.3.5a.</RotationNotes>
+  <RotationNotes>Sanación automática de grupo/banda. Selección de aliado por porcentaje de vida. Pendiente de prueba en PQR 3.3.5a.</RotationNotes>
  </Rotation>
 </PRIEST>
