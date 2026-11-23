@@ -52,7 +52,7 @@ La propuesta inicial es mantener Unitarget sin modificador y activar AoE al mant
 
 ## Estado del proyecto
 
-**Fase 1 – Ejecutor confirmado; perfiles en preparación.** La base documental está creada. Se recuperarán y revisarán los trabajos previos de Hunter y Warrior antes de implementar nuevas rotaciones. Ningún perfil se considerará validado hasta probarlo en el cliente objetivo.
+**Fase 2 – Estructura inicial de las 30 especializaciones creada.** Cada especialización tiene su carpeta, XML de habilidades, XML de rotación y README. Hunter Bestias conserva su base heredada recuperada. Las demás bases son esqueletos funcionales de estructura y prioridades iniciales, todavía pendientes de auditoría técnica, corrección de nombres localizados y pruebas en cliente. Ningún perfil se considera validado hasta probarlo en WoW 3.3.5a.
 
 ## Compatibilidad y uso
 
