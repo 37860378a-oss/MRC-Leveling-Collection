@@ -1,44 +1,89 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="utf-8"?>
 <PALADIN>
  <Ability>
-  <Name>-- MRC Smart Raid Heal --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
-  <Lua>if UnitExists("focus") and not UnitIsDeadOrGhost("focus") and UnitCanAssist("player","focus") then
- local found=false
- for i=1,40 do local n,_,_,_,_,_,_,_,_,_,spellId=UnitBuff("focus",i); if not n then break end; if n=="Señal de la Luz" then found=true end end
- if not found and IsUsableSpell("Señal de la Luz") then CastSpellByName("Señal de la Luz","focus"); return true end
+  <Name>-- MRC Heal Engine --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+  <Lua>-- MRC: seleccion automatica compatible con PQR_CustomTarget.
+local function MRC_HP(unit)
+ if not UnitExists(unit) or UnitIsDeadOrGhost(unit) or not UnitIsConnected(unit) then return nil end
+ local maximum=UnitHealthMax(unit)
+ if not maximum or maximum&lt;=0 then return nil end
+ return 100*UnitHealth(unit)/maximum
 end
-if not MRC then MRC={} end
- local units={}
- if GetNumRaidMembers and GetNumRaidMembers()&gt;0 then
-  for i=1,GetNumRaidMembers() do units[#units+1]="raid"..i end
- elseif GetNumPartyMembers and GetNumPartyMembers()&gt;0 then
-  units[#units+1]="player"
-  for i=1,GetNumPartyMembers() do units[#units+1]="party"..i end
- else units[1]="player" end
- return units
- local best,bestHP=nil,101
- for _,u in ipairs(units) do
-  if UnitExists(u) and not UnitIsDeadOrGhost(u) and UnitCanAssist("player",u) and UnitIsConnected(u) then
-   local hp=100*UnitHealth(u)/math.max(1,UnitHealthMax(u))
-   local inRange=UnitInRange(u)
-   if hp&lt;bestHP and (inRange==nil or inRange==1) then best,bestHP=u,hp end
-  end
+local function MRC_InRange(unit)
+ if unit=="player" then return true end
+ local r=UnitInRange(unit)
+ return r==1 or r==true
+end
+local best="player"
+local bestHP=MRC_HP("player") or 100
+local count=GetNumRaidMembers()
+if count and count&gt;0 then
+ for i=1,count do
+  local u="raid"..i
+  local hp=MRC_HP(u)
+  if hp and UnitCanAssist("player",u) and MRC_InRange(u) and hp&lt;bestHP then best,bestHP=u,hp end
  end
- if not best then return false end
- local spells={{name="Choque sagrado",hp=65},{name="Destello de luz",hp=55},{name="Luz sagrada",hp=80},{name="Luz divina",hp=92}}
- for _,sp in ipairs(spells) do
-  if bestHP&lt;sp.hp and IsUsableSpell(sp.name) then
-   local start,duration=GetSpellCooldown(sp.name)
-   if not start or not duration or duration&lt;=1.6 or start+duration&lt;=GetTime() then
-    CastSpellByName(sp.name,best)
+else
+ count=GetNumPartyMembers() or 0
+ for i=1,count do
+  local u="party"..i
+  local hp=MRC_HP(u)
+  if hp and UnitCanAssist("player",u) and MRC_InRange(u) and hp&lt;bestHP then best,bestHP=u,hp end
+ end
+end
+PQR_CustomTarget=best
+PQR_CustomTargetHP=bestHP
+-- Mantenimiento del tanque en foco. Solo intenta hechizos que el personaje ya conoce.
+if UnitExists("focus") and not UnitIsDeadOrGhost("focus") and UnitCanAssist("player","focus") then
+ local buffs={{id=53563,refresh=10},{id=53601,refresh=5}}
+ for _,b in ipairs(buffs) do
+  local spell=GetSpellInfo(b.id)
+  if spell and IsUsableSpell(spell) and IsSpellInRange(spell,"focus")==1 then
+   local expires=0
+   for j=1,40 do
+    local n,_,_,_,_,_,expiration,_,_,_,sid=UnitBuff("focus",j)
+    if not n then break end
+    if sid==b.id then expires=expiration or 0; break end
+   end
+   if expires==0 or expires-GetTime()&lt;b.refresh then
+    CastSpellByName(spell,"focus")
     return true
    end
   end
  end
- return false</Lua><RecastDelay>0</RecastDelay><Target>Custom</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+end
+return false</Lua>
+  <RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+ </Ability>
+ <Ability>
+  <Name>-- MRC Smart Heal --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+  <Lua>-- Cura al aliado seleccionado por MRC Heal Engine sin cambiar el target del jugador.
+local unit=PQR_CustomTarget
+local hp=PQR_CustomTargetHP
+if not unit or not UnitExists(unit) or UnitIsDeadOrGhost(unit) or not hp then return false end
+local spells={
+ {id=48825,threshold=75}, -- Choque Sagrado
+ {id=48785,threshold=58}, -- Destello de Luz
+ {id=48782,threshold=88}  -- Luz Sagrada
+}
+for _,entry in ipairs(spells) do
+ local name=GetSpellInfo(entry.id)
+ if name and hp&lt;=entry.threshold and IsUsableSpell(name) and IsSpellInRange(name,unit)==1 then
+  local start,duration=GetSpellCooldown(entry.id)
+  if not start or duration==0 or start+duration&lt;=GetTime() then
+   CastSpellByName(name,unit)
+   return true
+  end
+ end
+end
+return false</Lua>
+  <RecastDelay>0</RecastDelay><Target>Custom</Target><CancelChannel>True</CancelChannel><LuaBefore /><LuaAfter />
  </Ability>
  <Ability>
   <Name>-- MRC Control --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
-  <Lua>if IsLeftControlKeyDown() and not MRC.ctrl then MRC.ctrl=true; StopRota=not StopRota; PQR_WriteToChat(StopRota and "MRC pausado" or "MRC activo") elseif not IsLeftControlKeyDown() then MRC.ctrl=false end; return false</Lua><RecastDelay>0</RecastDelay><Target>Custom</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  <Lua>if not MRC then MRC={} end
+if IsLeftControlKeyDown() and not MRC.ctrl then MRC.ctrl=true; StopRota=not StopRota; PQR_WriteToChat(StopRota and "MRC pausado" or "MRC activo") elseif not IsLeftControlKeyDown() then MRC.ctrl=false end
+return false</Lua>
+  <RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
  </Ability>
 </PALADIN>
