@@ -10,11 +10,14 @@
   if not GetSpellName then return end
   for i=1,300 do local n=GetSpellName(i,BOOKTYPE_SPELL); if not n then break end; MRC.Book[n]=true end
  end
- function MRC.Known(n) if not MRC.Book or not next(MRC.Book) then MRC.Refresh() end; return MRC.Book[n]==true end
+ MRC.Refresh()
+ MRC.EventFrame=CreateFrame("Frame")
+ MRC.EventFrame:RegisterEvent("SPELLS_CHANGED")
+ MRC.EventFrame:SetScript("OnEvent",function() MRC.Refresh() end)
+ function MRC.Known(n) return MRC.Book and MRC.Book[n]==true end
  function MRC.Cast(n,aoe)
   if StopRota or not MRC.Known(n) then return false end
   if aoe and not IsShiftKeyDown() then return false end
-  if not aoe and IsShiftKeyDown() then return false end
   if UnitCastingInfo("player") or UnitChannelInfo("player") then return false end
   if not UnitExists("target") or UnitIsDeadOrGhost("target") or not IsUsableSpell(n) then return false end
   if UnitCanAttack('player','target') then return false end
