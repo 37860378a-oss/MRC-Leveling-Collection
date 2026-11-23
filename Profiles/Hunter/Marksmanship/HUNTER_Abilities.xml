@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='utf-8'?>
+<HUNTER>
+  <Ability>
+    <Name>-- Motor MRC --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>if not MRC then
+ MRC={}
+ MRC.Book={}
+ function MRC.Refresh()
+  MRC.Book={}
+  if not GetSpellName then return end
+  for i=1,300 do local n=GetSpellName(i,BOOKTYPE_SPELL); if not n then break end; MRC.Book[n]=true end
+ end
+ function MRC.Known(n) if not MRC.Book or not next(MRC.Book) then MRC.Refresh() end; return MRC.Book[n]==true end
+ function MRC.ValidTarget()
+  return UnitExists("target") and UnitCanAttack("player","target") and not UnitIsDeadOrGhost("target")
+ end
+ function MRC.Cast(n,aoe)
+  if StopRota or not MRC.Known(n) then return false end
+  if aoe and not IsShiftKeyDown() then return false end
+  if not aoe and IsShiftKeyDown() then return false end
+  if UnitCastingInfo("player") or UnitChannelInfo("player") then return false end
+  if not MRC.ValidTarget() or not IsUsableSpell(n) then return false end
+  local s,d=GetSpellCooldown(n)
+  if s and d and d&gt;1.6 and s+d&gt;GetTime() then return false end
+  if IsSpellInRange(n,"target")==0 then return false end
+  CastSpellByName(n)
+  return true
+ end
+end
+return false</Lua><RecastDelay>0</RecastDelay><Target>Custom</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Pausar rotacion --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>if IsLeftControlKeyDown() and not MRC.ctrl then MRC.ctrl=true; StopRota=not StopRota; PQR_WriteToChat(StopRota and "MRC pausado" or "MRC activo") elseif not IsLeftControlKeyDown() then MRC.ctrl=false end
+return false</Lua><RecastDelay>0</RecastDelay><Target>Custom</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Disparo de quimera --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Disparo de quimera", true)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Disparo de puntería --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Disparo de puntería", true)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Disparo mortal --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Disparo mortal", true)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Picadura de serpiente --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Picadura de serpiente", true)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Disparo arcano --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Disparo arcano", true)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Disparo firme --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Disparo firme", true)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Multidisparo --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Multidisparo", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+</HUNTER>
