@@ -1,0 +1,778 @@
+<?xml version='1.0' encoding='utf-8'?>
+<HUNTER>
+  <Ability>
+    <Name>-- Motor por nombres --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>-- Motor por NOMBRE localizado (cliente esES). No usa IDs de hechizos.
+if not HN then
+    HN = {}
+
+    function HN.RefreshBook()
+        HN.Book = {}
+        if not GetSpellName then return end
+        for i = 1, 300 do
+            local name = GetSpellName(i, BOOKTYPE_SPELL)
+            if not name then break end
+            HN.Book[name] = true
+        end
+    end
+
+    function HN.Known(spellName)
+        if not spellName or not GetSpellName then return false end
+        if not HN.Book then HN.RefreshBook() end
+        return HN.Book[spellName] == true
+    end
+
+    if not HN.BookEventFrame then
+        HN.BookEventFrame = CreateFrame("Frame")
+        HN.BookEventFrame:RegisterEvent("SPELLS_CHANGED")
+        HN.BookEventFrame:SetScript("OnEvent", function() HN.RefreshBook() end)
+    end
+
+    function HN.Buff(unit, spellName)
+        if not UnitExists(unit) then return false end
+        for i = 1, 40 do
+            local name = UnitBuff(unit, i)
+            if not name then break end
+            if name == spellName then return true end
+        end
+        return false
+    end
+
+    function HN.Debuff(unit, spellName)
+        if not UnitExists(unit) then return false end
+        for i = 1, 40 do
+            local name = UnitDebuff(unit, i)
+            if not name then break end
+            if name == spellName then return true end
+        end
+        return false
+    end
+
+    function HN.GCD()
+        local probes = {"Disparo firme", "Disparo Arcano", "Marca del cazador", "Picadura de serpiente"}
+        for _, name in ipairs(probes) do
+            if HN.Known(name) then
+                local start, duration = GetSpellCooldown(name)
+                if start and duration and duration &gt; 0 and duration &lt;= 1.6 and start + duration &gt; GetTime() then
+                    return true
+                end
+            end
+        end
+        return false
+    end
+
+    function HN.Ready(spellName)
+        if StopRota then return false end
+        if not HN.Known(spellName) then return false end
+        if UnitCastingInfo("player") or UnitChannelInfo("player") then return false end
+        if not IsUsableSpell(spellName) then return false end
+        local start, duration = GetSpellCooldown(spellName)
+        if start and duration and duration &gt; 1.6 and start + duration &gt; GetTime() then return false end
+        if HN.GCD() then return false end
+        return true
+    end
+
+    function HN.Cast(spellName, unit)
+        if not HN.Ready(spellName) then return false end
+        if unit and UnitExists(unit) and IsSpellInRange(spellName, unit) == 0 then return false end
+        -- PQR ejecuta este Lua con su motor de desbloqueo; SpellID=0 evita el casteo por ID.
+        CastSpellByName(spellName)
+        return true
+    end
+
+    function HN.TargetOK()
+        return not StopRota and UnitExists("target") and UnitCanAttack("player", "target") and not UnitIsDeadOrGhost("target")
+    end
+
+    function HN.HP(unit)
+        if not UnitExists(unit) or UnitHealthMax(unit) == 0 then return 100 end
+        return 100 * UnitHealth(unit) / UnitHealthMax(unit)
+    end
+
+    function HN.Mana()
+        if UnitPowerMax("player") == 0 then return 100 end
+        return 100 * UnitPower("player") / UnitPowerMax("player")
+    end
+end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Custom</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Control de rotacion --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if not HN then return false end
+if IsLeftControlKeyDown() and not HN.ctrl then
+    HN.ctrl = true
+    StopRota = not StopRota
+    PQR_WriteToChat(StopRota and "Rotacion pausada" or "Rotacion activa")
+elseif not IsLeftControlKeyDown() then HN.ctrl = false end
+if IsRightAltKeyDown() and not HN.alt then
+    HN.alt = true
+    HN.aoe = not HN.aoe
+    PQR_WriteToChat(HN.aoe and "Modo de area ACTIVADO" or "Modo de area DESACTIVADO")
+elseif not IsRightAltKeyDown() then HN.alt = false end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Custom</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Mantener mascota --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if StopRota or IsMounted() then return false end
+if not UnitExists("pet") then return HN.Cast("Llamar a mascota") end
+if UnitIsDead("pet") then return HN.Cast("Revivir mascota") end
+if HN.HP("pet") &lt; 68 and HN.Known("Aliviar mascota") and not HN.Buff("pet", "Aliviar mascota") then
+    TargetUnit("pet")
+    local casted = HN.Cast("Aliviar mascota")
+    TargetLastTarget()
+    return casted
+end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Pet</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Ataque de mascota --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and UnitExists("pet") and not UnitIsDead("pet") then
+    if UnitExists("pettarget") == nil or UnitGUID("pettarget") ~= UnitGUID("target") then
+        PetAttack()
+        return true
+    end
+end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Aspecto ofensivo --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if StopRota then return false end
+if HN.Mana() &lt; 22 and HN.Known("Aspecto de la víbora") then
+    if not HN.Buff("player", "Aspecto de la víbora") then return HN.Cast("Aspecto de la víbora") end
+else
+    if HN.Known("Aspecto del dracohalcón") then
+        if not HN.Buff("player", "Aspecto del dracohalcón") then return HN.Cast("Aspecto del dracohalcón") end
+    elseif HN.Known("Aspecto del halcón") and not HN.Buff("player", "Aspecto del halcón") then
+        return HN.Cast("Aspecto del halcón")
+    end
+end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Player</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Marca del cazador --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and not HN.Debuff("target", "Marca del cazador") then
+    return HN.Cast("Marca del cazador", "target")
+end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Disparo mortal --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and HN.HP("target") &lt;= 20 then return HN.Cast("Disparo mortal", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Fuego rapido --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and UnitAffectingCombat("player") then return HN.Cast("Fuego rápido", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Player</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Colera de las bestias --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and UnitExists("pet") and not UnitIsDead("pet") then return HN.Cast("Cólera de las bestias", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Player</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Matar --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and UnitExists("pet") and not UnitIsDead("pet") then return HN.Cast("Matar", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Picadura de serpiente --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and HN.HP("target") &gt; 35 and not HN.Debuff("target", "Picadura de serpiente") then
+    return HN.Cast("Picadura de serpiente", "target")
+end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Disparo de quimera --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() then return HN.Cast("Disparo de quimera", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Disparo explosivo --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() then return HN.Cast("Disparo explosivo", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Flecha negra --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and not HN.Debuff("target", "Flecha negra") then return HN.Cast("Flecha negra", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Disparo de punteria --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() then return HN.Cast("Disparo de puntería", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Disparo arcano --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() then return HN.Cast("Disparo Arcano", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Multidisparo --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.aoe and HN.TargetOK() then return HN.Cast("Multidisparo", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Disparo firme --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and GetUnitSpeed("player") == 0 then return HN.Cast("Disparo firme", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Disparo de conmocion --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and HN.HP("player") &lt; 55 then return HN.Cast("Disparo de conmoción", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Intimidacion --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and HN.HP("player") &lt; 45 and UnitExists("pet") then return HN.Cast("Intimidación", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Disuasion --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.HP("player") &lt; 28 then return HN.Cast("Disuasión") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Player</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Separacion --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and HN.HP("player") &lt; 35 then return HN.Cast("Separación", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Player</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Fingir muerte --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if not UnitAffectingCombat("player") and HN.HP("player") &lt; 20 then return HN.Cast("Fingir muerte") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Player</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Disparo silenciador --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and UnitCastingInfo("target") then return HN.Cast("Disparo silenciador", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Disparo tranquilizante --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() then
+    for i=1,40 do
+        local n, _, _, _, debuffType = UnitBuff("target", i)
+        if not n then break end
+        if debuffType == "Magic" or n == "Enfurecer" then return HN.Cast("Disparo tranquilizante", "target") end
+    end
+end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Alas cortadas --</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and HN.HP("player") &lt; 40 then return HN.Cast("Alas cortadas", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Picadura de vibora</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and HN.HP("target") &gt; 50 then return HN.Cast("Picadura de víbora", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Picadura de escorpido</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() then return HN.Cast("Picadura de escórpido", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Picadura de dracoleon</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() then return HN.Cast("Picadura de dracoleón", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Trampa congelante</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if not UnitAffectingCombat("player") and HN.TargetOK() then return HN.Cast("Trampa congelante", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Trampa explosiva</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.aoe and HN.TargetOK() then return HN.Cast("Trampa explosiva", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Trampa de inmolacion</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() then return HN.Cast("Trampa de inmolación", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Trampa de escarcha</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() then return HN.Cast("Trampa de escarcha", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Salva</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.aoe and HN.TargetOK() and GetUnitSpeed("player") == 0 then return HN.Cast("Salva", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Llamada de maestro</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if UnitExists("pet") and UnitDebuff("pet", 1) then return HN.Cast("Llamada de maestro") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Player</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Asustar bestia</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and UnitCreatureType("target") == "Bestia" then return HN.Cast("Asustar bestia", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Disparo de distraccion</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() then return HN.Cast("Disparo de distracción", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Disparo de dispersion</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() then return HN.Cast("Disparo de dispersión", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Redireccion</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and UnitExists("focus") and not UnitIsDeadOrGhost("focus") then
+    TargetUnit("focus")
+    local casted = HN.Cast("Redirección")
+    TargetLastTarget()
+    return casted
+end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Focus</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Ojo de aguila</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if not UnitAffectingCombat("player") then return HN.Cast("Ojo de águila") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Player</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Tradicion de bestias</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if UnitExists("target") and not UnitAffectingCombat("player") then return HN.Cast("Tradición de bestias", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Aspecto del guepardo</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if not UnitAffectingCombat("player") then return HN.Cast("Aspecto del guepardo") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Player</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Aspecto de la manada</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if not UnitAffectingCombat("player") then return HN.Cast("Aspecto de la manada") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Player</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Aspecto de la bestia</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if not UnitAffectingCombat("player") then return HN.Cast("Aspecto de la bestia") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Player</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Aspecto salvaje</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if not HN.Buff("player", "Aspecto salvaje") then return HN.Cast("Aspecto salvaje") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Player</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Golpe de raptor</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and HN.HP("player") &lt; 45 then return HN.Cast("Golpe de raptor", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Mordedura de mangosta</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and HN.HP("player") &lt; 45 then return HN.Cast("Mordedura de mangosta", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Contraataque</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() and HN.HP("player") &lt; 45 then return HN.Cast("Contraataque", "target") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Target</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>Manual: Preparacion</Name>
+    <Default>false</Default>
+    <SpellID>0</SpellID>
+    <Actions />
+    <Lua>if HN.TargetOK() then return HN.Cast("Preparación") end
+return false</Lua>
+    <RecastDelay>0</RecastDelay>
+    <Target>Player</Target>
+    <CancelChannel>False</CancelChannel>
+    <LuaBefore />
+    <LuaAfter />
+  </Ability>
+</HUNTER>
