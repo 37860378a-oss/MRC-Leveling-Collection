@@ -1,10 +1,10 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="utf-8"?>
 <PALADIN>
  <Rotation>
   <RotationName>MRC_Holy_SmartHeal_1-80_ES</RotationName>
   <RotationDefault>true</RotationDefault>
-  <RotationList>-- MRC Smart Raid Heal --|-- MRC Control --</RotationList>
+  <RotationList>-- MRC Heal Engine --|-- MRC Smart Heal --|-- MRC Control --</RotationList>
   <RequireCombat>false</RequireCombat>
-  <RotationNotes>Sanación automática de grupo/banda. Selección de aliado por porcentaje de vida. Tanque en focus para Señal de la Luz. Pendiente de prueba en PQR 3.3.5a.</RotationNotes>
+  <RotationNotes>Sanacion automatica para grupo y banda. El motor actualiza PQR_CustomTarget con el aliado vivo de menor porcentaje de vida dentro de rango. No requiere seleccionar manualmente al aliado. Configurar el tanque como focus para mantener Senal de la Luz y Escudo Sagrado cuando esten aprendidos. Pendiente de prueba en cliente 3.3.5a.</RotationNotes>
  </Rotation>
 </PALADIN>
