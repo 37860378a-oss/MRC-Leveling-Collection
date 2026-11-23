@@ -56,6 +56,17 @@ return false</Lua>
   <RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
  </Ability>
  <Ability>
+  <Name>-- MRC Judgement of Light --</Name><Default>false</Default><SpellID>20271</SpellID><Actions />
+  <Lua>-- Mantiene Sentencia de Luz en el enemigo que el jugador conserva como target.
+if not UnitExists("target") or UnitIsDeadOrGhost("target") or not UnitCanAttack("player","target") then return false end
+if IsSpellInRange(GetSpellInfo(20271),"target")~=1 then return false end
+if UnitDebuffID("target",20185,"player") then return false end
+local start,duration=GetSpellCooldown(20271)
+if start and duration and duration&gt;0 and start+duration&gt;GetTime() then return false end
+return IsUsableSpell(GetSpellInfo(20271))</Lua>
+  <RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+ </Ability>
+ <Ability>
   <Name>-- MRC Smart Heal --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
   <Lua>-- Cura al aliado seleccionado por MRC Heal Engine sin cambiar el target del jugador.
 local unit=PQR_CustomTarget
