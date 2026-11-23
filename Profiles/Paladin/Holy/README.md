@@ -26,3 +26,11 @@ Los umbrales son provisionales y necesitan calibración en combate real. Los hec
 5. Probar también sin grupo y en banda.
 
 **Importante:** el código está actualizado, pero todavía no está validado en el cliente. La compatibilidad de `CastSpellByName(nombre, unidad)`, los nombres localizados y el comportamiento de `PQR_CustomTarget` deben confirmarse en juego.
+
+
+## Objetivo enemigo y Sentencia de Luz
+- Mantener un enemigo hostil en `target` durante el combate.
+- La habilidad MRC revisa si ese enemigo tiene Sentencia de Luz (debuff 20185 aplicado por el jugador).
+- Si falta, está en rango y el hechizo está disponible, lanza Sentencia de Luz sobre `target`.
+- El motor de curación sigue usando `PQR_CustomTarget`, por lo que no necesita reemplazar el enemigo seleccionado para curar.
+- El perfil no cambia automáticamente de enemigo: el jugador conserva el control del `target`.
