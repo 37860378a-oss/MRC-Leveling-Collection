@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<HUNTER>
+  <Rotation>
+    <RotationName>MRC_Marksmanship_Leveo_1-80_ES</RotationName>
+    <RotationDefault>true</RotationDefault>
+    <RotationList>-- Motor MRC --|-- Pausar rotacion --|-- Disparo de quimera --|-- Disparo de puntería --|-- Disparo mortal --|-- Picadura de serpiente --|-- Disparo arcano --|-- Disparo firme --|-- Multidisparo --</RotationList>
+    <RequireCombat>false</RequireCombat>
+    <RotationNotes>Base inicial MRC para leveo 1-80. Comprueba habilidades aprendidas por nombre en el libro de hechizos esES. Unitarget normal; mantener SHIFT para permitir habilidades AoE. CTRL izquierdo pausa/reanuda. Pendiente de auditoría y prueba real en WoW 3.3.5a con PQR/DarhangeR.</RotationNotes>
+  </Rotation>
+</HUNTER>
