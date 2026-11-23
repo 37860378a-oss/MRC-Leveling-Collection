@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<HUNTER>
+  <Rotation>
+    <RotationName>Cazador_BM_Leveo_1-80_ES</RotationName>
+    <RotationDefault>true</RotationDefault>
+    <RotationList>-- Motor por nombres --|-- Control de rotacion --|-- Mantener mascota --|-- Ataque de mascota --|-- Aspecto ofensivo --|-- Marca del cazador --|-- Disparo mortal --|-- Disparo silenciador --|-- Disparo tranquilizante --|-- Colera de las bestias --|-- Matar --|-- Picadura de serpiente --|-- Disparo de quimera --|-- Disparo explosivo --|-- Flecha negra --|-- Disparo de punteria --|-- Disparo arcano --|-- Multidisparo --|-- Disparo firme --|-- Disparo de conmocion --|-- Intimidacion --|-- Disuasion --|-- Separacion --|-- Alas cortadas --|-- Fingir muerte --</RotationList>
+    <RequireCombat>false</RequireCombat>
+    <RotationNotes>Leveo BM nivel 1-80. Las habilidades se buscan por nombre en el libro de hechizos esES; si todavía no las aprendiste, se omiten. Ctrl izquierdo pausa/reanuda. Alt derecho activa/desactiva Multidisparo. Mantener mascota invocada y en modo agresivo/asistir. Disparo automático se activa al atacar y no se lanza como habilidad.</RotationNotes>
+  </Rotation>
+</HUNTER>
