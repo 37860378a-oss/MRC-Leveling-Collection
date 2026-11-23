@@ -1,44 +1,28 @@
 # Paladín – Sagrado (leveo 1–80)
 
-**Estado:** base inicial generada; pendiente de auditoría y pruebas en WoW 3.3.5a.
+**Estado:** prototipo de sanación automática implementado en GitHub; pendiente de pruebas reales en WoW 3.3.5a con PQR.
 
-Archivos: `PALADIN_Abilities.xml` y `PALADIN_Rotations.xml`.
-
-- PQR con estructura DarhangeR.
-- Omite hechizos no aprendidos según el libro esES.
-- CTRL izquierdo: pausa/reanuda.
-- SHIFT: habilita las habilidades AoE listadas.
-- Perfil de sanación: requiere seleccionar manualmente un aliado; no automatiza selección de grupo ni prioridades por porcentaje de vida.
-
-
-## Prioridad inicial
-1. Choque sagrado
-2. Destello de luz
-3. Luz sagrada
-4. Luz divina
-5. Señal de la Luz
-
-
-**Advertencia:** las prioridades son un punto de partida, no una rotación optimizada. Revisar traducciones, requisitos de talentos, recursos, armas, formas, rango y APIs del ejecutor. No usar como validado hasta probarlo en cliente 3.3.5a.
-
-
-## Actualización: sanación inteligente
-
-# Paladín Sagrado – leveo 1–80
-
-**Estado:** base de sanación inteligente añadida; pendiente de pruebas reales en WoW 3.3.5a.
-
-- Recorre automáticamente miembros de raid o grupo (y al jugador).
-- Prioriza al aliado con menor porcentaje de vida dentro de rango.
-- No requiere cambiar el target manualmente.
+## Funcionamiento
+- El motor recorre automáticamente al jugador y los miembros de grupo o banda.
+- Selecciona al aliado vivo con menor porcentaje de vida que esté dentro de rango.
+- Guarda la unidad elegida en `PQR_CustomTarget` y su vida en `PQR_CustomTargetHP`, siguiendo el mecanismo del perfil DarhangeR.
+- Lanza las curas sobre esa unidad sin exigir que el jugador la seleccione manualmente.
+- Si hay un tanque válido en `focus`, intenta mantener Señal de la Luz y Escudo Sagrado cuando esos hechizos estén aprendidos y disponibles.
 - CTRL izquierdo pausa/reanuda.
-- Configurá el tanque como foco: aplica Señal de la Luz al foco cuando detecta que falta.
 
+## Hechizos de curación
+Se usan los identificadores de hechizos de la versión 3.3.5a para obtener el nombre localizado y lanzar el rango más alto aprendido:
+- Choque Sagrado: umbral inicial 75%.
+- Destello de Luz: umbral inicial 58%.
+- Luz Sagrada: umbral inicial 88%.
 
-**Sanación inteligente de grupo/banda:** el perfil busca automáticamente aliados vivos y conectados en el grupo, evalúa su porcentaje de vida y lanza la curación elegida sin cambiar manualmente el objetivo. El tanque debe estar configurado como foco para la Señal de la Luz (Paladín). Los umbrales son valores iniciales y requieren calibración. La selección automática, el casteo por unidad y el comportamiento en PQR deben verificarse en el cliente 3.3.5a; no está validado todavía.
+Los umbrales son provisionales y necesitan calibración en combate real. Los hechizos no aprendidos o fuera de rango se omiten.
 
-## Hechizos configurados
-- Choque sagrado: umbral inicial 65%
-- Destello de luz: umbral inicial 55%
-- Luz sagrada: umbral inicial 80%
-- Luz divina: umbral inicial 92%
+## Prueba pendiente
+1. Entrar al juego con el perfil cargado en PQR.
+2. Configurar el tanque como foco.
+3. Agruparse con al menos otro jugador herido.
+4. Iniciar la rotación y comprobar que mantiene los buffs en focus y cura al miembro herido sin cambiar el target manual.
+5. Probar también sin grupo y en banda.
+
+**Importante:** el código está actualizado, pero todavía no está validado en el cliente. La compatibilidad de `CastSpellByName(nombre, unidad)`, los nombres localizados y el comportamiento de `PQR_CustomTarget` deben confirmarse en juego.
