@@ -5,6 +5,16 @@
   <RotationDefault>true</RotationDefault>
   <RotationList>-- MRC Heal Engine --|-- MRC Judgement of Light --|-- MRC Smart Heal --|-- MRC Control --</RotationList>
   <RequireCombat>false</RequireCombat>
-  <RotationNotes>Sanacion automatica para grupo y banda. Mantener un enemigo en target para aplicar y renovar Sentencia de Luz. El motor actualiza PQR_CustomTarget con el aliado vivo de menor porcentaje de vida dentro de rango. No requiere seleccionar manualmente al aliado. Configurar el tanque como focus para mantener Senal de la Luz y Escudo Sagrado cuando esten aprendidos. Pendiente de prueba en cliente 3.3.5a.</RotationNotes>
+  <RotationNotes>MRC - PALADIN SAGRADO (NIVELES 1-80)
+
+INSTRUCCIONES:
+- Coloca al tanque como foco (focus).
+- Mantén un enemigo hostil seleccionado para aplicar Sentencia de Luz.
+- No selecciones manualmente al aliado que necesita curación: el perfil lo busca automáticamente en grupo o banda.
+- Puedes gestionar tus sellos desde PQR según la situación; MRC no fuerza ninguno.
+- CTRL izquierdo: pausar o reanudar el perfil.
+
+MRC - Modular Rotation Collection
+Estado: prototipo; requiere pruebas en cliente 3.3.5a.</RotationNotes>
  </Rotation>
 </PALADIN>
