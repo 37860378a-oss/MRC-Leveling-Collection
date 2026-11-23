@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='utf-8'?>
+<WARRIOR>
+  <Ability>
+    <Name>-- Motor MRC --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>if not MRC then
+ MRC={}
+ MRC.Book={}
+ function MRC.Refresh()
+  MRC.Book={}
+  if not GetSpellName then return end
+  for i=1,300 do local n=GetSpellName(i,BOOKTYPE_SPELL); if not n then break end; MRC.Book[n]=true end
+ end
+ function MRC.Known(n) if not MRC.Book or not next(MRC.Book) then MRC.Refresh() end; return MRC.Book[n]==true end
+ function MRC.ValidTarget()
+  return UnitExists("target") and UnitCanAttack("player","target") and not UnitIsDeadOrGhost("target")
+ end
+ function MRC.Cast(n,aoe)
+  if StopRota or not MRC.Known(n) then return false end
+  if aoe and not IsShiftKeyDown() then return false end
+  if not aoe and IsShiftKeyDown() then return false end
+  if UnitCastingInfo("player") or UnitChannelInfo("player") then return false end
+  if not MRC.ValidTarget() or not IsUsableSpell(n) then return false end
+  local s,d=GetSpellCooldown(n)
+  if s and d and d&gt;1.6 and s+d&gt;GetTime() then return false end
+  if IsSpellInRange(n,"target")==0 then return false end
+  CastSpellByName(n)
+  return true
+ end
+end
+return false</Lua><RecastDelay>0</RecastDelay><Target>Custom</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Pausar rotacion --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>if IsLeftControlKeyDown() and not MRC.ctrl then MRC.ctrl=true; StopRota=not StopRota; PQR_WriteToChat(StopRota and "MRC pausado" or "MRC activo") elseif not IsLeftControlKeyDown() then MRC.ctrl=false end
+return false</Lua><RecastDelay>0</RecastDelay><Target>Custom</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Embate con escudo --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Embate con escudo", true)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Revancha --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Revancha", true)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Devastar --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Devastar", true)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Atronar --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Atronar", true)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Rajar --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Rajar", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Golpe heroico --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Golpe heroico", true)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Lanzamiento heroico --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Lanzamiento heroico", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Muro de escudo --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Muro de escudo", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Última carga --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Última carga", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+  <Ability>
+    <Name>-- Bloquear con escudo --</Name><Default>false</Default><SpellID>0</SpellID><Actions />
+    <Lua>return MRC.Cast("Bloquear con escudo", false)</Lua><RecastDelay>0</RecastDelay><Target>Target</Target><CancelChannel>False</CancelChannel><LuaBefore /><LuaAfter />
+  </Ability>
+</WARRIOR>
